@@ -5,23 +5,23 @@ $usuario->VerificacionCuenta();
 ?>
 <!DOCTYPE html>
 <html lang="es">
-	<head>
-		<meta charset="utf-8">
-		<title><?php echo TITULO ?></title>
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-		<link rel="shortcut icon" href="<?php echo ESTATICO ?>img/favicon.ico">
-		<link rel="stylesheet" href="<?php echo ESTATICO ?>css/bootstrap.css" media="screen">
-		<link rel="stylesheet" href="<?php echo ESTATICO ?>css/bootstrap.min.css">
-		<link rel="stylesheet" href="<?php echo ESTATICO ?>css/qualtiva.css">
-		<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/plug-ins/1.10.7/integration/bootstrap/3/dataTables.bootstrap.css">
-		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
-		<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-		<!--[if lt IE 9]>
-		  <script src="<?php echo ESTATICO ?>html5shiv.js"></script>
-		  <script src="<?php echo ESTATICO ?>respond.min.js"></script>
-		<![endif]-->
-	</head>
+<head>
+	<meta charset="utf-8">
+	<title><?php echo TITULO ?></title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<link rel="shortcut icon" href="<?php echo ESTATICO ?>img/favicon.ico">
+	<link rel="stylesheet" href="<?php echo ESTATICO ?>css/bootstrap.css" media="screen">
+	<link rel="stylesheet" href="<?php echo ESTATICO ?>css/bootstrap.min.css">
+	<link rel="stylesheet" href="<?php echo ESTATICO ?>css/qualtiva.css">
+	<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/plug-ins/1.10.7/integration/bootstrap/3/dataTables.bootstrap.css">
+	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+	<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+	<!--[if lt IE 9]>
+	  <script src="<?php echo ESTATICO ?>html5shiv.js"></script>
+	  <script src="<?php echo ESTATICO ?>respond.min.js"></script>
+	<![endif]-->
+</head>
 <body>
 	<?php Menu(); ?>
     <div class="container">
@@ -33,13 +33,12 @@ $usuario->VerificacionCuenta();
 			if(isset($_POST['cajatmp'])){
 				$numero		= filter_var($_POST['numero'], FILTER_VALIDATE_INT);
 				$cantidad	= filter_var($_POST['cantidad'], FILTER_VALIDATE_INT);
-				$vendedor	= filter_var($_POST['vendedor'], FILTER_VALIDATE_INT);
 				$tipo		= filter_var($_POST['tipo'], FILTER_VALIDATE_INT);
-				$fecha		= FechaActual();
-				$hora		= HoraActual();
+				$fecha	= FechaActual();
+				$hora	= HoraActual();
 				$vendedor	= $usuarioApp['id'];
 				$IdVentaSQL = $db->Conectar()->query("SELECT
-				  MAX(`id`)+1 AS idfactura
+				  MAX(`id`) AS idfactura
 				FROM
 				  `factura`");
 				$IdVenta	= $IdVentaSQL->fetch_array();
@@ -52,14 +51,14 @@ $usuario->VerificacionCuenta();
 						<button type="button" class="close" data-dismiss="alert">×</button>
 						<strong>&iexcl;Bien hecho!</strong> Haz un agregado n&uacute;mero con exito.
 					</div>
-					<meta http-equiv="refresh" content="2;url='.URLBASE.'"/>';
+					<meta http-equiv="refresh" content="0;url='.URLBASE.'"/>';
 				}else{
 					echo'
 					<div class="alert alert-dismissible alert-danger">
 						<button type="button" class="close" data-dismiss="alert">×</button>
 						<strong>&iexcl;Lo Sentimos!</strong> A ocurrido un error al agregado n&uacute;mero, intentalo de nuevo.
 					</div>
-					<meta http-equiv="refresh" content="2;url='.URLBASE.'"/>';
+					<meta http-equiv="refresh" content="0;url='.URLBASE.'"/>';
 				}
 			}
 			if(isset($_POST['ActualizarCantidad'])){
@@ -154,7 +153,7 @@ $usuario->VerificacionCuenta();
 						<div class="form-group">
 							<div class="input-group">
 								<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-								<input type="text" class="form-control" name="fecha" id="inputEmail3" value="<?php echo FechaActual(); ?>" autofocus required disabled>
+								<input type="text" class="form-control" id="inputEmail3" value="<?php echo FechaActual(); ?>" autofocus required disabled>
 							</div>
 						</div>
 					</div>
@@ -326,8 +325,13 @@ $usuario->VerificacionCuenta();
 							<h4 class="modal-title" id="myModalLabel">Registrar Compra Actual</h4>
 						  </div>
 						  <div class="modal-body">
-							<form class="form-horizontal" method="post" action="">
-								<input type="hidden" name="IdNumero" value="<?php echo $cajatmp['id']; ?>">
+							<form class="form-horizontal" method="post" action="<?php echo URLBASE ?>registrar-compra">
+								<?php
+								$idVenSql	= $db->Conectar()->query("SELECT idventa FROM `cajatmp` WHERE vendedor='{$usuarioApp['id']}' LIMIT 1");
+								$idVen		= $idVenSql->fetch_array();
+								?>
+								<input type="hidden" name="IdNumero" value="<?php echo $idVen['idventa']; ?>">
+								<input type="hidden" name="total" value="<?php echo $neto['deudatotal']; ?>">
 								<div class="form-group">
 									<div class="col-sm-12">
 										<h2>Neto a Pagar: &cent; <?php echo $Vendedor->FormatoSaldo($neto['deudatotal']); ?></strong></h2>
@@ -340,8 +344,8 @@ $usuario->VerificacionCuenta();
 								</div>
 								<div class="form-group">
 									<div class="col-sm-offset-2 col-sm-10">
-									   <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-										<button type="submit" name="EliminarNumero" class="btn btn-primary">Registrar Compra</button>
+										<button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+										<button type="submit" name="RegistrarCompra" class="btn btn-primary">Registrar Compra</button>
 									</div>
 								</div>
 							</form>
@@ -359,24 +363,25 @@ $usuario->VerificacionCuenta();
     </div>
 	<!-- Cargado archivos javascript al final para que la pagina cargue mas rapido -->
     <script src="<?php echo ESTATICO ?>js/jquery-1.10.2.min.js"></script>
-	<script type="text/javascript" language="javascript" src="<?php echo ESTATICO ?>js/jquery.dataTables.min.js"></script>
-	<script type="text/javascript" language="javascript" src="<?php echo ESTATICO ?>js/dataTables.bootstrap.js"></script>
+	<script src="<?php echo ESTATICO ?>js/jquery.dataTables.min.js"></script>
+	<script src="<?php echo ESTATICO ?>js/dataTables.bootstrap.js"></script>
+    <script src="<?php echo ESTATICO ?>js/bootstrap.min.js"></script>
+    <script src="<?php echo ESTATICO ?>js/bootswatch.js"></script>
 	<script type="text/javascript" charset="utf-8">
 		$(document).ready(function() {
 			$('#example').dataTable();
 		} );
 	</script>
 	<script type="text/javascript">
-function justNumbers(e)
-{
-var keynum = window.event ? window.event.keyCode : e.which;
-if ((keynum == 8) || (keynum == 46))
-return true;
- 
-return /\d/.test(String.fromCharCode(keynum));
-}
+		function justNumbers(e)
+		{
+		var keynum = window.event ? window.event.keyCode : e.which;
+		if ((keynum == 8) || (keynum == 46))
+		return true;
+		 
+		return /\d/.test(String.fromCharCode(keynum));
+		}
 	</script>
-    <script src="<?php echo ESTATICO ?>js/bootstrap.min.js"></script>
-    <script src="<?php echo ESTATICO ?>js/bootswatch.js"></script>
+	<!-- Cargado archivos javascript al final para que la pagina cargue mas rapido Fin -->
 </body>
 </html>
